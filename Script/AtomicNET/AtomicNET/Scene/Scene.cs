@@ -20,13 +20,13 @@ namespace AtomicEngine
             {
                 //Log.Info($"Node REMOVED: {e.Node.Name}");
 
-				Vector<CSComponent> components = new Vector<CSComponent>();
-				e.Node.GetComponents<CSComponent>(components);
+                Vector<CSComponent> components = new Vector<CSComponent>();
+                e.Node.GetComponents<CSComponent>(components);
 
-				for (uint i = 0; i < components.Size; i++)
-				{
-					HandleComponentRemoved(components[i]);
-				}
+                for (uint i = 0; i < components.Size; i++)
+                {
+                    HandleComponentRemoved(components[i]);
+                }
 
             });
 
@@ -34,23 +34,23 @@ namespace AtomicEngine
 
             SubscribeToEvent<ComponentAddedEvent>(this, HandleComponentAdded);
 
-			SubscribeToEvent<ComponentRemovedEvent>(this, e =>
-			{
-				Component component = null;
+            SubscribeToEvent<ComponentRemovedEvent>(this, e =>
+            {
+                Component component = null;
 
-				try
-				{
-					// will throw if component isn't a known native
-					component = e.Component;
-				}
-				catch
-				{
-					return;
-				}
+                try
+                {
+                    // will throw if component isn't a known native
+                    component = e.Component;
+                }
+                catch
+                {
+                    return;
+                }
 
-				HandleComponentRemoved(component);
+                HandleComponentRemoved(component);
 
-			});
+            });
 
             // Update variable timestep logic
             SubscribeToEvent<SceneUpdateEvent>(this, HandleSceneUpdate);
@@ -211,39 +211,39 @@ namespace AtomicEngine
             }
         }
 
-		void HandleComponentRemoved(Component component)
-		{
-			if (component.GetType() == typeof(PhysicsWorld) || component.GetType() == typeof(PhysicsWorld2D))
-			{
-				UnsubscribeFromEvent<PhysicsPreStepEvent>();
-				UnsubscribeFromEvent<PhysicsPostStepEvent>();
-			}
+        void HandleComponentRemoved(Component component)
+        {
+            if (component.GetType() == typeof(PhysicsWorld) || component.GetType() == typeof(PhysicsWorld2D))
+            {
+                UnsubscribeFromEvent<PhysicsPreStepEvent>();
+                UnsubscribeFromEvent<PhysicsPostStepEvent>();
+            }
 
-			if (component.GetType().GetTypeInfo().IsSubclassOf(typeof(CSComponent)))
-			{
-				var csc = (CSComponent)component;
+            if (component.GetType().GetTypeInfo().IsSubclassOf(typeof(CSComponent)))
+            {
+                var csc = (CSComponent)component;
 
-				CSComponentInfo info;
+                CSComponentInfo info;
 
-				if (!CSComponentCore.csinfoLookup.TryGetValue(csc.GetType(), out info))
-				{
-					return;
-				}
+                if (!CSComponentCore.csinfoLookup.TryGetValue(csc.GetType(), out info))
+                {
+                    return;
+                }
 
-				cscomponentStart.Remove(csc);
+                cscomponentStart.Remove(csc);
 
-				List<CSComponent> cslist;
+                List<CSComponent> cslist;
 
-				if (!cscomponents.TryGetValue(info, out cslist))
-				{
-					return;
-				}
+                if (!cscomponents.TryGetValue(info, out cslist))
+                {
+                    return;
+                }
 
-				cslist.Remove(csc);
+                cslist.Remove(csc);
 
-			}
+            }
 
-		}
+        }
 
         void HandleCSComponentLoad(CSComponentLoadEvent e)
         {
