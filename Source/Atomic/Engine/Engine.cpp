@@ -37,6 +37,7 @@
 #include "../IO/PackageFile.h"
 
 // ATOMIC BEGIN
+#include "../Metrics/Metrics.h"
 #include "../Resource/XMLFile.h"
 // ATOMIC END
 
@@ -147,6 +148,7 @@ Engine::Engine(Context* context) :
     context_->RegisterSubsystem(new Network(context_));
 #endif
     // ATOMIC BEGIN
+    context_->RegisterSubsystem(new Metrics(context_));
 #ifdef ATOMIC_WEB
     context_->RegisterSubsystem(new Web(context_));
 #endif
