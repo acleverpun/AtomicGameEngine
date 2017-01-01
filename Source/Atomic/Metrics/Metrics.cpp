@@ -33,7 +33,16 @@ bool Metrics::everEnabled_ = false;
 
 bool MetricsSnapshot::CompareInstanceMetrics(const MetricsSnapshot::InstanceMetric& lhs, const MetricsSnapshot::InstanceMetric& rhs)
 {
+    // TODO: Introduce various sorting modes, for now alphabetical is best "only" option
+
+    return lhs.classname < rhs.classname;
+
+    /*
+    if (lhs.count == rhs.count)
+        return lhs.classname < rhs.classname;
+
     return lhs.count > rhs.count;
+    */
 }
 
 void MetricsSnapshot::Clear()
@@ -43,9 +52,9 @@ void MetricsSnapshot::Clear()
     resourceMetrics_.Clear();
 }
 
-String MetricsSnapshot::Dump()
+String MetricsSnapshot::PrintData(unsigned columns, unsigned minCount)
 {
-    String text;
+    String output;
 
     Vector<MetricsSnapshot::InstanceMetric> instanceSort;
 
@@ -61,17 +70,54 @@ String MetricsSnapshot::Dump()
 
     Vector<MetricsSnapshot::InstanceMetric>::ConstIterator instanceSortItr = instanceSort.Begin();
 
+    static const int NAME_MAX_LENGTH = 20;
+    static const int ENTRY_MAX_LENGTH = 128;
+    
+    char name[NAME_MAX_LENGTH];
+    char entry[ENTRY_MAX_LENGTH];
+
+    String line;
+
+    String header = "Class                 Total ( Native /  JS  /  C# )     ";
+
+    for (unsigned i = 0; i < columns; i++)
+        output += header;
+
+    output += "\n\n";
+
+    unsigned column = 0;
+
     while (instanceSortItr != instanceSort.End())
     {
         const InstanceMetric& metric = *instanceSortItr;
 
-        text += ToString("%s : %u ( %u native / %u js / %u C# )\n", metric.classname.CString(), metric.count,
-                         metric.nativeInstances, metric.jsInstances, metric.netInstances);
+        if (metric.count < minCount)
+            continue;
+
+        snprintf(name, NAME_MAX_LENGTH, "%-20s", metric.classname.CString());
+        
+        // We use snprintf here as ToString doesn't seem to cover the unsigned %5u format
+        snprintf(entry, ENTRY_MAX_LENGTH, "%s : %5u ( %5u, %5u, %5u )", name , metric.count, metric.nativeInstances, metric.jsInstances, metric.netInstances);
+
+        if (columns == 1 || column == columns)
+        {
+            line += "\n";
+            output += line;
+            line.Clear();                        
+            column = 0;
+        }
+
+        line += entry;
+        column++;
+        line += "     ";
 
         instanceSortItr++;
     }
 
-    return text;
+    if (line.Length())
+        output += line;
+
+    return output;
 
 }
 

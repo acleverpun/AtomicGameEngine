@@ -34,6 +34,8 @@
 
 #include "../../DebugNew.h"
 
+#include "../../Metrics/Metrics.h"
+
 namespace Atomic
 {
 
@@ -60,6 +62,7 @@ static const float FPS_UPDATE_INTERVAL = 0.5f;
 DebugHud::DebugHud(Context* context) :
     Object(context),
     profilerMaxDepth_(M_MAX_UNSIGNED),
+    profilerMode_(DEBUG_HUD_PROFILE_PERFORMANCE),
     profilerInterval_(1000),
     useRendererStats_(true),
     mode_(DEBUGHUD_SHOW_NONE),
@@ -207,6 +210,7 @@ void DebugHud::Update(float timeStep)
     }
 
     Profiler* profiler = GetSubsystem<Profiler>();
+    
     if (profiler)
     {
         if (profilerTimer_.GetMSec(false) >= profilerInterval_)
@@ -215,13 +219,68 @@ void DebugHud::Update(float timeStep)
 
             if (profilerText_->IsVisible())
             {
-                String profilerOutput = profiler->PrintData(false, false, profilerMaxDepth_);
+                String profilerOutput;
+
+                if (profilerMode_ == DEBUG_HUD_PROFILE_PERFORMANCE)
+                {
+                    profilerOutput = profiler->PrintData(false, false, profilerMaxDepth_);
+                }
+                else
+                {
+                    Metrics* metrics = GetSubsystem<Metrics>();
+
+                    if (metrics)
+                    {
+                        if (!metrics->GetEnabled())
+                            metrics->Enable();
+
+                        SharedPtr<MetricsSnapshot> snapshot(new MetricsSnapshot());
+                        metrics->Capture(snapshot);
+                        profilerOutput = snapshot->PrintData(3);
+                    }
+                    else
+                    {
+                        profilerOutput = "Metrics subsystem not found";
+                    }
+
+                }
+
                 profilerText_->SetText(profilerOutput);
             }
 
             profiler->BeginInterval();
         }
     }
+}
+
+void DebugHud::SetProfilerMode(DebugHudProfileMode mode)
+{ 
+    profilerMode_ = mode; 
+
+    if (profilerMode_ == DEBUG_HUD_PROFILE_PERFORMANCE)
+    {
+        if (profilerText_.NotNull())
+        {
+            profilerText_->SetText("");
+            profilerText_->SetFont(profilerText_->GetFont(), 11);
+        }
+    }
+    else
+    {
+        int size = 8;
+
+        Metrics* metrics = GetSubsystem<Metrics>();
+
+        if (!metrics)
+            size = 32;
+
+        if (profilerText_.NotNull())
+        {
+            profilerText_->SetText("");
+            profilerText_->SetFont(profilerText_->GetFont(), size);
+        }
+    }
+
 }
 
 void DebugHud::SetDefaultStyle(XMLFile* style)

@@ -31,13 +31,13 @@ class MetricsSnapshot : public RefCounted
 {
     friend class Metrics;
 
-    ATOMIC_REFCOUNTED(MetricsSnapshot);
+    ATOMIC_REFCOUNTED(MetricsSnapshot)
 
 public:
 
     MetricsSnapshot() {}
 
-    String Dump();
+    String PrintData(unsigned columns = 1, unsigned minCount = 0);
 
     void Clear();
 
@@ -97,7 +97,9 @@ private:
 /// Metrics subsystem
 class ATOMIC_API Metrics : public Object
 {
-    ATOMIC_OBJECT(Metrics, Object);
+    friend class Application;
+
+    ATOMIC_OBJECT(Metrics, Object)
 
 public:
 
@@ -107,11 +109,14 @@ public:
     virtual ~Metrics();
 
     bool Enable();
-    void Disable();
+
+    bool GetEnabled() const { return enabled_; }    
 
     void Capture(MetricsSnapshot* snapshot);
 
-private:
+private:    
+
+    void Disable();
 
     void CaptureInstances(MetricsSnapshot* snapshot);
 

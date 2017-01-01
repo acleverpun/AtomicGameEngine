@@ -66,6 +66,12 @@ protected:
     String startupErrors_;
     /// Application exit code.
     int exitCode_;
+
+    // ATOMIC BEGIN
+
+    static bool autoMetrics_;
+
+    // ATOMIC END
 };
 
 // Macro for defining a main function which creates a Context and the application, then runs it
