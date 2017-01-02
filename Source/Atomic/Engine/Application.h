@@ -54,6 +54,12 @@ public:
     /// Show an error message (last log message if empty), terminate the main loop, and set failure exit code.
     void ErrorExit(const String& message = String::EMPTY);
 
+    // ATOMIC BEGIN
+
+    static void SetAutoMetrics(bool value) { autoMetrics_ = value;  }
+
+    // ATOMIC END
+
 protected:
     /// Handle log message.
     void HandleLogMessage(StringHash eventType, VariantMap& eventData);

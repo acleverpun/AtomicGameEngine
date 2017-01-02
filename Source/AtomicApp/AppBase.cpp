@@ -71,11 +71,6 @@ namespace Atomic
 
     void AppBase::AddArgument(const String& argument)
     {
-        if (argument == "--autometrics")
-        {
-            autoMetrics_ = true;
-        }
-
         arguments_.Push(argument);
     }
 
