@@ -236,7 +236,7 @@ void DebugHud::Update(float timeStep)
 
                         SharedPtr<MetricsSnapshot> snapshot(new MetricsSnapshot());
                         metrics->Capture(snapshot);
-                        profilerOutput = snapshot->PrintData(3);
+                        profilerOutput = snapshot->PrintData(2);
                     }
                     else
                     {

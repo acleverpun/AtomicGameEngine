@@ -124,12 +124,13 @@ String MetricsSnapshot::PrintData(unsigned columns, unsigned minCount)
 Metrics::Metrics(Context* context) :
     Object(context),
     enabled_(false)
-{
+{    
     Metrics::metrics_ = this;
 }
 
 Metrics::~Metrics()
 {
+    Disable();
     Metrics::metrics_ = 0;
 }
 
